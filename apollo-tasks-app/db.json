@@ -1,0 +1,63 @@
+{
+  "tasks": [
+    {
+      "id": "425jg6p0jsp5kupz",
+      "name": "Soccer game at 5:30pm",
+      "category": "awer54ytdf4",
+      "status": "COMPLETED",
+      "createdDate": "2019-02-28T21:40:48.647Z"
+    },
+    {
+      "id": "425jg6p0jsp5lfil",
+      "name": "Pick up Grandma from the Airport",
+      "category": "awer54ytdf4",
+      "status": "INCOMPLETE",
+      "createdDate": "2019-02-28T21:41:15.597Z"
+    },
+    {
+      "id": "425jg6p0jsp5o0vv",
+      "name": "Safety Meeting",
+      "category": "34sd45twfer",
+      "status": "COMPLETED",
+      "createdDate": "2019-02-28T21:43:16.603Z"
+    },
+    {
+      "id": "425jg6ttjsp5w31x",
+      "name": "Mow the lawn",
+      "category": "4jh54t45",
+      "status": "COMPLETED",
+      "createdDate": "2019-02-28T21:49:32.660Z"
+    },
+    {
+      "id": "425jg6ufjsp65qgp",
+      "name": "Take car to shop",
+      "category": "4jh54t45",
+      "status": "INCOMPLETE",
+      "createdDate": "2019-02-28T21:57:02.904Z"
+    },
+    {
+      "id": "425jg74hjsp8pp33",
+      "name": "Chili Cook Off on Friday",
+      "category": "34sd45twfer",
+      "status": "INCOMPLETE",
+      "createdDate": "2019-02-28T23:08:33.470Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "4jh54t45",
+      "name": "Home",
+      "color": "#ffcc00"
+    },
+    {
+      "id": "34sd45twfer",
+      "name": "Work",
+      "color": "green"
+    },
+    {
+      "id": "awer54ytdf4",
+      "name": "Family",
+      "color": "blue"
+    }
+  ]
+}
