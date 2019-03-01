@@ -5,7 +5,7 @@ import { resolvers } from './resolvers';
 
 const GRAPHQL_PORT = process.env.PORT || 3010;
 const REST_PORT = process.env.REST_PORT || 3020;
-const REST_SERVER_URL = `http://localhost:${REST_PORT}`;
+export const REST_SERVER_URL = `http://localhost:${REST_PORT}`;
 
 const context = {
     restUrl: REST_SERVER_URL,

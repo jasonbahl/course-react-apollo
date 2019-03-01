@@ -90,21 +90,6 @@ const TaskList = ({ filters }) => (
         })
         unsubscribe = subscribeToMore({
           document: TASK_UPDATED_SUBCRIPTION,
-          updateQuery: (prev, { subscriptionData }) => {
-            if (!subscriptionData.data) return prev
-            const { taskUpdated } = subscriptionData.data
-            if (taskUpdated) {
-              const index = prev.tasks.findIndex(
-                obj => obj.id === taskUpdated.id
-              )
-              const newTasks = [...prev.tasks, ...prev.tasks.slice(index + 1)]
-
-              console.log(newTasks)
-
-              return prev
-            }
-            return prev
-          },
         })
       }
       return (

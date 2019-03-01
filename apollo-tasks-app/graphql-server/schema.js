@@ -5,6 +5,7 @@ type Query {
   categories( search: String ): [Category]
   task( id:ID! ): Task
   tasks( filters: TasksFilterInput ): [Task]
+  paginatedTasks( page: Int limit: Int filters: TasksFilterInput): PaginatedTasks
 }
 
 type Mutation {
@@ -19,6 +20,13 @@ type Subscription {
   taskUpdated: Task
 }
 
+type PaginatedTasks {
+  page: Int
+  limit: Int
+  total: Int
+  nextPage: Int
+  tasks: [Task]
+}
 
 type CreateTaskPayload {
   task: Task

@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { Mutation } from "react-apollo"
 import gql from "graphql-tag"
-import { GET_TASKS_QUERY } from "../TaskList"
 import { Input, Button } from "antd"
 import CategorySelect from "../CategorySelect"
 
@@ -27,7 +26,6 @@ class NewTaskForm extends Component {
   }
 
   render() {
-    const { filters } = this.props
     return (
       <Mutation mutation={CREATE_NEW_TASK_MUTATION}>
         {(createTask, { data, error, loading }) => {

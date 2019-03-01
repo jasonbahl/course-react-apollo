@@ -1,7 +1,6 @@
-import fetch from "node-fetch"
 import { PubSub } from "graphql-subscriptions"
+import { CategoryModel, TasksModel } from "./models"
 
-const uniqid = require("uniqid")
 const pubsub = new PubSub()
 const TASK_CREATED = "taskCreated"
 const TASK_DELETED = "taskDeleted"
@@ -12,120 +11,67 @@ export const resolvers = {
     hello: () => {
       return `world`
     },
-    categories: async (root, args, { restUrl }, info) => {
-      const search = args.search ? args.search : ""
-      return await fetch(`${restUrl}/categories?q=${search}`)
-        .then(res => res.json())
+    categories: async () => {
+      return await CategoryModel.getCategories();
     },
-    category: async (root, { id }, { restUrl }, info) => {
-      return await fetch(`${restUrl}/categories/${id}`)
-        .then(res => res.json())
-        .then(res => {
-          // First item from the response
-          return res[0] ? res[0] : null
-        })
+    category: async () => {
+      return await CategoryModel.getCategoryById(id);
     },
-    tasks: async (root, { filters }, { restUrl }) => {
-      let searchArgs = {
-        _sort: `createdDate`,
-        _order: `desc`
-      }
-      if (filters.status === `COMPLETED` || filters.status === `INCOMPLETE`) {
-        searchArgs.status = filters.status
-      }
-      if (filters.category) {
-        searchArgs.category = filters.category
+    tasks: async (root, { filters = {} }) => {
+      const res = await TasksModel.getTasks(filters);
+      return res.tasks;
+    },
+    paginatedTasks: async (root, { page, limit, filters = {} }) => {
+
+      if ( page ) {
+        filters.page = page;
       }
 
-      const searchParams = new URLSearchParams(searchArgs)
-      const queryString = searchParams.toString()
+      if ( limit ) {
+        filters.limit = limit;
+      }
 
-      return await fetch(`${restUrl}/tasks?${queryString}`)
-        .then(res => {
-          return res.json()
-        })
+      return await TasksModel.getTasks(filters);
     },
-    task: async (root, { id }, { restUrl }, info) => {
-      return await fetch(`${restUrl}/task/${id}`)
-        .then(res => {
-          return res.json()
-        })
-        .then(res => {
-          // First item from the response
-          return res[0] ? res[0] : null
-        })
+    task: async (root, { id } ) => {
+      return await TasksModel.getTaskById(id);
     },
   },
   Task: {
-    category: async ({ category }, args, { restUrl }, info) => {
-
-      if (!category) {
-        return await null
-      }
-
-      return await fetch(`${restUrl}/categories/${category}`)
-        .then(res => res.json())
-        .then(res => {
-          return res
-        })
+    category: async ({ category }) => {
+      return await ! category ? null : CategoryModel.getCategoryById( category );
     },
   },
   Category: {
-    tasks: async ({ id }, args, { restUrl }, info) => {
-      return await fetch(`${restUrl}/tasks?category=${id}`)
-        .then(res => res.json())
+    tasks: async ({ id }) => {
+      const res = await TasksModel.getTasks({category: id});
+      return res.tasks;
     },
   },
   Mutation: {
-    createTask: async (root, { input: { name, category } }, { restUrl }, info) => {
-
-      const payload = {
-        id: uniqid(),
-        name,
-        category: category ? category : null,
-        status: "INCOMPLETE",
-        createdDate: new Date(),
-      }
-
-      return await fetch(`${restUrl}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }).then(res => res.json())
-        .then(task => {
-          pubsub.publish(TASK_CREATED, { taskCreated: task })
-          return {
-            task,
-          }
-        })
-
+    createTask: async (root, { input }) => {
+      return await TasksModel.createTask(input).then(task => {
+        pubsub.publish(TASK_CREATED, { taskCreated: task })
+        return {
+          task,
+        }
+      })
     },
-    deleteTask: (root, { id }, { restUrl }) => {
-      return fetch(`${restUrl}/tasks/${id}`)
-        .then(res => res.json())
-        .then(task => {
-          return fetch(`${restUrl}/tasks/${id}`, { method: "DELETE" })
-            .then(() => task)
-        })
-        .then(task => {
-          pubsub.publish(TASK_DELETED, { taskDeleted: task })
-          return task
-        })
+    deleteTask: async (root, { id }) => {
+      return await TasksModel.getTaskById(id).then(task => {
+        TasksModel.deleteTask(id);
+        return task;
+      }).then(task => {
+        pubsub.publish(TASK_DELETED, { taskDeleted: task })
+        return task;
+      });
     },
-    updateTask: async (root, { id, input }, { restUrl }) => {
+    updateTask: async (root, { id, input }) => {
+      return await TasksModel.updateTask(id, input).then(task => {
+        pubsub.publish(TASK_UPDATED, { taskUpdated: task })
+        return task
+      })
 
-      let payload = input
-      payload.id = id
-
-      return await fetch(`${restUrl}/tasks/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }).then(res => res.json())
-        .then(task => {
-          pubsub.publish(TASK_UPDATED, { taskUpdated: task })
-          return task
-        })
     },
   },
   Subscription: {

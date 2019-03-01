@@ -2,7 +2,6 @@ import React from "react"
 import { Mutation } from "react-apollo"
 import { Button } from "antd"
 import gql from "graphql-tag"
-import { GET_TASKS_QUERY } from "../TaskList"
 
 const DELETE_TASK_MUTATION = gql`
   mutation DELETE_TASK($id: ID!) {
