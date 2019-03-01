@@ -1,10 +1,11 @@
 import fetch from "node-fetch"
-import { PubSub } from 'graphql-subscriptions';
-const uniqid = require("uniqid")
-const pubsub = new PubSub();
-const TASK_CREATED = 'taskCreated';
-const TASK_DELETED = 'taskDeleted';
+import { PubSub } from "graphql-subscriptions"
 
+const uniqid = require("uniqid")
+const pubsub = new PubSub()
+const TASK_CREATED = "taskCreated"
+const TASK_DELETED = "taskDeleted"
+const TASK_UPDATED = "taskUpdated"
 
 export const resolvers = {
   Query: {
@@ -17,7 +18,6 @@ export const resolvers = {
         .then(res => res.json())
     },
     category: async (root, { id }, { restUrl }, info) => {
-
       return await fetch(`${restUrl}/categories/${id}`)
         .then(res => res.json())
         .then(res => {
@@ -26,10 +26,10 @@ export const resolvers = {
         })
     },
     tasks: async (root, { filters }, { restUrl }) => {
-
-      console.log(filters)
-
-      let searchArgs = {}
+      let searchArgs = {
+        _sort: `createdDate`,
+        _order: `desc`
+      }
       if (filters.status === `COMPLETED` || filters.status === `INCOMPLETE`) {
         searchArgs.status = filters.status
       }
@@ -46,7 +46,7 @@ export const resolvers = {
         })
     },
     task: async (root, { id }, { restUrl }, info) => {
-      return await fetch(`${restUrl}/categories/${id}`)
+      return await fetch(`${restUrl}/task/${id}`)
         .then(res => {
           return res.json()
         })
@@ -93,89 +93,50 @@ export const resolvers = {
         body: JSON.stringify(payload),
       }).then(res => res.json())
         .then(task => {
-          pubsub.publish(TASK_CREATED, { taskCreated: task });
+          pubsub.publish(TASK_CREATED, { taskCreated: task })
           return {
-            task
-          };
+            task,
+          }
         })
 
     },
-    deleteTask: async (root, { id }, { restUrl }) => {
-
-      fetch(`${restUrl}/tasks/${id}}`)
+    deleteTask: (root, { id }, { restUrl }) => {
+      return fetch(`${restUrl}/tasks/${id}`)
         .then(res => res.json())
         .then(task => {
-          return fetch(`${restUrl}/tasks/${id}`, { method: 'DELETE' })
-            .then(() => task);
+          return fetch(`${restUrl}/tasks/${id}`, { method: "DELETE" })
+            .then(() => task)
         })
         .then(task => {
-          pubsub.publish(TASK_DELETED, { taskDeleted: task });
-          return task;
+          pubsub.publish(TASK_DELETED, { taskDeleted: task })
+          return task
         })
-
-
-      return await fetch(`${restUrl}/tasks/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      }).then(res => {
-        return true
-      }).then()
-
-    },
-    markTaskComplete: async (root, { id }, { restUrl }) => {
-
-      const payload = {
-        status: `COMPLETED`,
-      }
-
-      return await fetch(`${restUrl}/tasks/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }).then(res => {
-        return true
-      })
-    },
-    markTaskIncomplete: async (root, { id }, { restUrl }) => {
-
-      const payload = {
-        status: `INCOMPLETE`,
-      }
-
-      return await fetch(`${restUrl}/tasks/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }).then(res => {
-        return true
-      })
     },
     updateTask: async (root, { id, input }, { restUrl }) => {
 
-      let payload = input;
-      payload.id = id;
+      let payload = input
+      payload.id = id
 
-      const task = await fetch(`${restUrl}/tasks`, {
+      return await fetch(`${restUrl}/tasks/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       }).then(res => res.json())
-        .then(res => {
-          return res
+        .then(task => {
+          pubsub.publish(TASK_UPDATED, { taskUpdated: task })
+          return task
         })
-
-      return {
-        task,
-      }
     },
   },
-  // @todo
-  // Subscription: {
-  //   taskCreated: {
-  //     subscribe: () => pubsub.asyncIterator(TASK_CREATED),
-  //   },
-  //   taskDeleted: {
-  //     subscribe: () => pubsub.asyncIterator(TASK_DELETED),
-  //   },
-  // },
+  Subscription: {
+    taskCreated: {
+      subscribe: () => pubsub.asyncIterator(TASK_CREATED),
+    },
+    taskDeleted: {
+      subscribe: () => pubsub.asyncIterator(TASK_DELETED),
+    },
+    taskUpdated: {
+      subscribe: () => pubsub.asyncIterator(TASK_UPDATED),
+    },
+  },
 }

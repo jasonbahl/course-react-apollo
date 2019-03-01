@@ -31,7 +31,6 @@ class NewTaskForm extends Component {
     return (
       <Mutation
         mutation={CREATE_NEW_TASK_MUTATION}
-        refetchQueries={[{ query: GET_TASKS_QUERY, variables: { filters } }]}
       >
         {(createTask, { data, error, loading }) => {
           if (error) {
@@ -50,6 +49,7 @@ class NewTaskForm extends Component {
                 })
               }}
             >
+              <h3>Create Task:</h3>
               <Input.Group compact>
                 <Input
                   name="task"

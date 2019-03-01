@@ -9,15 +9,14 @@ type Query {
 
 type Mutation {
   createTask(input:CreateTaskInput!): CreateTaskPayload
-  deleteTask(id:ID!): Boolean
-  markTaskComplete(id:ID!): Boolean
-  markTaskIncomplete(id:ID!): Boolean
-  updateTask(id:ID! input:UpdateTaskInput!): Boolean
+  deleteTask(id:ID!): Task
+  updateTask(id:ID! input:UpdateTaskInput!): Task
 }
 
 type Subscription {
   taskCreated: Task
   taskDeleted: Task
+  taskUpdated: Task
 }
 
 

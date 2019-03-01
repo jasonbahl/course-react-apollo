@@ -6,20 +6,16 @@ import { GET_TASKS_QUERY } from "../TaskList"
 
 const DELETE_TASK_MUTATION = gql`
   mutation DELETE_TASK($id: ID!) {
-    deleteTask(id: $id)
+    deleteTask(id: $id) {
+      id
+      name
+    }
   }
 `
-export const DeleteTaskButton = ({ id, filters }) => (
+export const DeleteTaskButton = ({ id }) => (
   <Mutation
     mutation={DELETE_TASK_MUTATION}
     variables={{ id }}
-    refetchQueries={[
-      {
-        query: GET_TASKS_QUERY,
-        variables: { filters },
-        fetchPolicy: `network-only`,
-      },
-    ]}
   >
     {deleteTask => (
       <Button type="danger" onClick={() => deleteTask()}>
@@ -29,28 +25,24 @@ export const DeleteTaskButton = ({ id, filters }) => (
   </Mutation>
 )
 
-const MARK_TASK_COMPLETE_MUTATION = gql`
-  mutation MARK_TASK_COMPLETE($id: ID!) {
-    markTaskComplete(id: $id)
+const UPDATE_TASK_MUTATION = gql`
+  mutation UPDATE_TASK($id: ID! $input: UpdateTaskInput!) {
+    updateTask(id: $id, input:$input) {
+      id
+      status
+    }
   }
 `
-export const MarkTaskCompleteButton = ({ id, filters }) => (
+export const MarkTaskCompleteButton = ({ id }) => (
   <Mutation
-    mutation={MARK_TASK_COMPLETE_MUTATION}
-    variables={{ id }}
-    refetchQueries={[
-      {
-        query: GET_TASKS_QUERY,
-        variables: { filters },
-        fetchPolicy: `network-only`,
-      },
-    ]}
+    mutation={UPDATE_TASK_MUTATION}
+    variables={{ id, input: { status: `COMPLETED` } }}
   >
-    {markTaskComplete => (
+    {updateTask => (
       <Button
         style={{ marginRight: `10px` }}
         type="primary"
-        onClick={() => markTaskComplete()}
+        onClick={() => updateTask()}
       >
         Mark Completed
       </Button>
@@ -58,28 +50,18 @@ export const MarkTaskCompleteButton = ({ id, filters }) => (
   </Mutation>
 )
 
-const MARK_TASK_INCOMPLETE_MUTATION = gql`
-  mutation MARK_TASK_INCOMPLETE($id: ID!) {
-    markTaskIncomplete(id: $id)
-  }
-`
-export const MarkTaskIncompleteButton = ({ id, filters }) => (
+
+export const MarkTaskIncompleteButton = ({ id }) => (
   <Mutation
-    mutation={MARK_TASK_INCOMPLETE_MUTATION}
-    variables={{ id, status: `INCOMPLETE` }}
-    refetchQueries={[
-      {
-        query: GET_TASKS_QUERY,
-        variables: { filters },
-      },
-    ]}
+    mutation={UPDATE_TASK_MUTATION}
+    variables={{ id, input: { status: `INCOMPLETE` } }}
   >
-    {markTaskIncomplete => (
+    {updateTask => (
       <Button
         style={{ marginRight: `10px` }}
         type="danger"
         ghost
-        onClick={() => markTaskIncomplete()}
+        onClick={() => updateTask()}
       >
         Mark Incomplete
       </Button>

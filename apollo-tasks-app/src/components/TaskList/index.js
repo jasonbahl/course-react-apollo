@@ -13,16 +13,99 @@ export const GET_TASKS_QUERY = gql`
   ${TaskFieldsFragment}
 `
 
+export const TASK_CREATED_SUBSCRIPTION = gql`
+  subscription {
+    taskCreated {
+      ...TaskFields
+    }
+  }
+  ${TaskFieldsFragment}
+`
+
+export const TASK_DELETED_SUBSCRIPTION = gql`
+  subscription {
+    taskDeleted {
+      ...TaskFields
+    }
+  }
+  ${TaskFieldsFragment}
+`
+
+export const TASK_UPDATED_SUBCRIPTION = gql`
+subscription {
+  taskUpdated {
+    ...TaskFields
+  }
+}
+${TaskFieldsFragment}
+`
+
+let unsubscribe = null
 const TaskList = ({ filters }) => (
   <Query
     query={GET_TASKS_QUERY}
     variables={{ filters: filters }}
     fetchPolicy="network-only"
   >
-    {({ loading, error, data }) => {
+    {({ loading, error, data, subscribeToMore }) => {
       if (error) {
         console.log(error)
         return `Error! ${error.message}`
+      }
+      if (!unsubscribe) {
+        unsubscribe = subscribeToMore({
+          document: TASK_CREATED_SUBSCRIPTION,
+          updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) return prev
+            const { taskCreated } = subscriptionData.data
+            if (taskCreated) {
+              return {
+                ...prev,
+                tasks: [taskCreated, ...prev.tasks],
+              }
+            }
+            return prev
+          },
+        })
+        unsubscribe = subscribeToMore({
+          document: TASK_DELETED_SUBSCRIPTION,
+          updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) return prev
+            const { taskDeleted } = subscriptionData.data
+            if (taskDeleted) {
+              const index = prev.tasks.findIndex(obj => obj.id === taskDeleted.id);
+              const newTasks = [
+                ...prev.tasks.slice(0, index),
+                ...prev.tasks.slice(index + 1)
+              ]
+              return {
+                ...prev,
+                tasks: newTasks
+              }
+            }
+            return prev
+          },
+        })
+        unsubscribe = subscribeToMore({
+          document: TASK_UPDATED_SUBCRIPTION,
+          updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) return prev
+            const { taskUpdated } = subscriptionData.data
+            if (taskUpdated) {
+              const index = prev.tasks.findIndex(obj => obj.id === taskUpdated.id);
+              const newTasks = [
+                ...prev.tasks,
+                ...prev.tasks.slice(index + 1)
+              ]
+
+
+              console.log( newTasks );
+
+              return prev;
+            }
+            return prev
+          },
+        })
       }
       return (
         <List

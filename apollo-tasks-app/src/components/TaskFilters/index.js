@@ -9,7 +9,7 @@ const TaskFilters = ({ filters, setTaskFilters }) => {
   return (
     <Row type="flex">
       <Col xs={24}>
-        <h3>Filters:</h3>
+        <h3>Filter Tasks:</h3>
         <Row type="flex" style={{ margin: `15px 0` }}>
           <Col xs={24} md={12}>
             <CategorySelect
