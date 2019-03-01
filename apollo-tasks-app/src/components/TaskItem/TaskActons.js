@@ -13,10 +13,7 @@ const DELETE_TASK_MUTATION = gql`
   }
 `
 export const DeleteTaskButton = ({ id }) => (
-  <Mutation
-    mutation={DELETE_TASK_MUTATION}
-    variables={{ id }}
-  >
+  <Mutation mutation={DELETE_TASK_MUTATION} variables={{ id }}>
     {deleteTask => (
       <Button type="danger" onClick={() => deleteTask()}>
         Delete
@@ -26,8 +23,8 @@ export const DeleteTaskButton = ({ id }) => (
 )
 
 const UPDATE_TASK_MUTATION = gql`
-  mutation UPDATE_TASK($id: ID! $input: UpdateTaskInput!) {
-    updateTask(id: $id, input:$input) {
+  mutation UPDATE_TASK($id: ID!, $input: UpdateTaskInput!) {
+    updateTask(id: $id, input: $input) {
       id
       status
     }
@@ -49,7 +46,6 @@ export const MarkTaskCompleteButton = ({ id }) => (
     )}
   </Mutation>
 )
-
 
 export const MarkTaskIncompleteButton = ({ id }) => (
   <Mutation

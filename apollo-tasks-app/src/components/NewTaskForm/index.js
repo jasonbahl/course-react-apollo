@@ -29,9 +29,7 @@ class NewTaskForm extends Component {
   render() {
     const { filters } = this.props
     return (
-      <Mutation
-        mutation={CREATE_NEW_TASK_MUTATION}
-      >
+      <Mutation mutation={CREATE_NEW_TASK_MUTATION}>
         {(createTask, { data, error, loading }) => {
           if (error) {
             console.log(error)

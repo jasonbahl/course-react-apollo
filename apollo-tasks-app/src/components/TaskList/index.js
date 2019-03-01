@@ -32,12 +32,12 @@ export const TASK_DELETED_SUBSCRIPTION = gql`
 `
 
 export const TASK_UPDATED_SUBCRIPTION = gql`
-subscription {
-  taskUpdated {
-    ...TaskFields
+  subscription {
+    taskUpdated {
+      ...TaskFields
+    }
   }
-}
-${TaskFieldsFragment}
+  ${TaskFieldsFragment}
 `
 
 let unsubscribe = null
@@ -73,14 +73,16 @@ const TaskList = ({ filters }) => (
             if (!subscriptionData.data) return prev
             const { taskDeleted } = subscriptionData.data
             if (taskDeleted) {
-              const index = prev.tasks.findIndex(obj => obj.id === taskDeleted.id);
+              const index = prev.tasks.findIndex(
+                obj => obj.id === taskDeleted.id
+              )
               const newTasks = [
                 ...prev.tasks.slice(0, index),
-                ...prev.tasks.slice(index + 1)
+                ...prev.tasks.slice(index + 1),
               ]
               return {
                 ...prev,
-                tasks: newTasks
+                tasks: newTasks,
               }
             }
             return prev
@@ -92,16 +94,14 @@ const TaskList = ({ filters }) => (
             if (!subscriptionData.data) return prev
             const { taskUpdated } = subscriptionData.data
             if (taskUpdated) {
-              const index = prev.tasks.findIndex(obj => obj.id === taskUpdated.id);
-              const newTasks = [
-                ...prev.tasks,
-                ...prev.tasks.slice(index + 1)
-              ]
+              const index = prev.tasks.findIndex(
+                obj => obj.id === taskUpdated.id
+              )
+              const newTasks = [...prev.tasks, ...prev.tasks.slice(index + 1)]
 
+              console.log(newTasks)
 
-              console.log( newTasks );
-
-              return prev;
+              return prev
             }
             return prev
           },
